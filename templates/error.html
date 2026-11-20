@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} {{ title }} | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-md-7 col-lg-5 text-center">
+    <div class="card card-safety p-4">
+      <div class="card-body">
+        <div class="display-3 fw-bold text-danger mb-2">{{ code }}</div>
+        <h3 class="fw-bold mb-2">{{ title }}</h3>
+        <p class="text-muted mb-4">{{ message }}</p>
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{{ url_for('dashboard.home') }}" class="btn btn-brand">Go Home</a>
+          <a href="tel:112" class="btn btn-outline-danger fw-bold">Call 112</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

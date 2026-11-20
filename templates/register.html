@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Register | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <div class="card card-safety p-3 p-md-4">
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <div class="stat-icon bg-primary-subtle text-primary mx-auto mb-2">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <h3 class="fw-bold">Create Account</h3>
+          <p class="text-muted small mb-0">Register to set up trusted contacts and emergency SOS tools.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+          <div class="mb-3">
+            <label for="full_name" class="form-label fw-semibold">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ form_data.get('full_name', '') }}" required minlength="2" maxlength="120" placeholder="Enter your full name" />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form_data.get('email', '') }}" required placeholder="name@example.com" />
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold">Phone Number</label>
+            <input type="tel" class="form-control" id="phone" name="phone" value="{{ form_data.get('phone', '') }}" required placeholder="+91 9876543210" />
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required minlength="8" placeholder="Minimum 8 characters" />
+          </div>
+
+          <div class="mb-4">
+            <label for="confirm_password" class="form-label fw-semibold">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8" placeholder="Re-enter your password" />
+          </div>
+
+          <button type="submit" class="btn btn-brand w-100 py-2 fw-semibold">
+            <i class="bi bi-check-circle me-1"></i>Register Securely
+          </button>
+        </form>
+
+        <hr class="my-4" />
+        <p class="text-center small text-muted mb-0">
+          Already registered? <a href="{{ url_for('auth.login') }}" class="fw-semibold">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

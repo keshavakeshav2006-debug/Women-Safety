@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Welcome, {{ user.full_name }}</h2>
+    <p class="text-muted mb-0">Quick access to emergency assistance, live location sharing, and safety records.</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('sos.sos_page') }}" class="btn btn-danger fw-bold px-4">
+      <i class="bi bi-exclamation-octagon-fill me-2"></i>Trigger SOS Alert
+    </a>
+    <a href="tel:112" class="btn btn-outline-danger fw-bold">
+      <i class="bi bi-telephone-fill me-1"></i>Call 112 (India)
+    </a>
+  </div>
+</div>
+
+<!-- Emergency Assistance & Quick Modules -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <a href="{{ url_for('sos.sos_page') }}" class="text-decoration-none">
+      <div class="card card-safety card-safety-hover h-100 border-danger-subtle">
+        <div class="card-body">
+          <div class="stat-icon bg-danger-subtle text-danger mb-2"><i class="bi bi-broadcast"></i></div>
+          <h6 class="fw-bold text-dark mb-1">SOS Emergency</h6>
+          <p class="small text-muted mb-0">Confirmed alert &amp; notify contacts ({{ active_alert_count }} active)</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-lg-3">
+    <a href="{{ url_for('sos.location_sharing') }}" class="text-decoration-none">
+      <div class="card card-safety card-safety-hover h-100">
+        <div class="card-body">
+          <div class="stat-icon bg-primary-subtle text-primary mb-2"><i class="bi bi-geo-alt-fill"></i></div>
+          <h6 class="fw-bold text-dark mb-1">Share Location</h6>
+          <p class="small text-muted mb-0">Interactive map &amp; shareable OpenStreetMap link</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-lg-3">
+    <a href="{{ url_for('services.nearby_services') }}" class="text-decoration-none">
+      <div class="card card-safety card-safety-hover h-100">
+        <div class="card-body">
+          <div class="stat-icon bg-success-subtle text-success mb-2"><i class="bi bi-hospital"></i></div>
+          <h6 class="fw-bold text-dark mb-1">Nearby Help</h6>
+          <p class="small text-muted mb-0">Police stations &amp; hospitals on Leaflet map</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-lg-3">
+    <a href="{{ url_for('incidents.manage_incidents') }}" class="text-decoration-none">
+      <div class="card card-safety card-safety-hover h-100">
+        <div class="card-body">
+          <div class="stat-icon bg-warning-subtle text-warning-emphasis mb-2"><i class="bi bi-flag-fill"></i></div>
+          <h6 class="fw-bold text-dark mb-1">Report Incident</h6>
+          <p class="small text-muted mb-0">Submit &amp; track reports ({{ total_reports }} filed)</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Trusted Contacts Summary -->
+  <div class="col-lg-6">
+    <div class="card card-safety h-100">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Trusted Contacts ({{ total_contacts }})</h5>
+        <a href="{{ url_for('contacts.list_contacts') }}" class="btn btn-sm btn-outline-primary">Manage Contacts</a>
+      </div>
+      <div class="card-body">
+        {% if contacts %}
+          <ul class="list-group list-group-flush">
+            {% for c in contacts %}
+              <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ c.name }} <span class="badge bg-light text-dark border ms-1">{{ c.relationship }}</span></div>
+                  <div class="small text-muted">{{ c.phone }}{% if c.email %} • {{ c.email }}{% endif %}</div>
+                </div>
+                <a href="tel:{{ c.phone }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-telephone"></i></a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <p class="mb-2">No trusted contacts added yet.</p>
+            <a href="{{ url_for('contacts.list_contacts') }}" class="btn btn-sm btn-brand">Add First Trusted Contact</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent SOS Alerts -->
+  <div class="col-lg-6">
+    <div class="card card-safety h-100">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-danger me-2"></i>Recent SOS Alerts</h5>
+        <a href="{{ url_for('sos.sos_history') }}" class="btn btn-sm btn-outline-secondary">Full History</a>
+      </div>
+      <div class="card-body">
+        {% if recent_alerts %}
+          <ul class="list-group list-group-flush">
+            {% for alert in recent_alerts %}
+              <li class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-semibold">Alert #{{ alert.id }}</span>
+                  <span class="badge {% if alert.status == 'active' %}bg-danger{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ alert.status|capitalize }}
+                  </span>
+                </div>
+                <div class="small text-muted mb-1">{{ alert.created_at.strftime('%d %b %Y, %I:%M %p UTC') }}</div>
+                <div class="small">
+                  {% if alert.map_link %}
+                    <a href="{{ alert.map_link }}" target="_blank" rel="noopener"><i class="bi bi-map me-1"></i>View Location ({{ alert.latitude }}, {{ alert.longitude }})</a>
+                  {% else %}
+                    <span class="text-muted">Location not attached</span>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <p class="mb-0">No SOS alerts triggered yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Secondary Quick Links -->
+<div class="row g-3 mt-2">
+  <div class="col-md-4">
+    <a href="{{ url_for('notifications.notification_logs') }}" class="btn btn-outline-dark w-100 py-2">
+      <i class="bi bi-bell me-2"></i>Notification Delivery Logs
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('sos.sos_history') }}" class="btn btn-outline-dark w-100 py-2">
+      <i class="bi bi-list-check me-2"></i>SOS Alert History
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('dashboard.safety_info') }}" class="btn btn-outline-dark w-100 py-2">
+      <i class="bi bi-info-circle me-2"></i>Safety Guidelines &amp; Helplines
+    </a>
+  </div>
+</div>
+{% endblock %}

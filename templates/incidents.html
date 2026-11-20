@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Incident Reporting | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card card-safety">
+      <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-flag-fill text-warning me-2"></i>Report Safety Incident</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('incidents.manage_incidents') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" id="incidentLat" name="latitude" />
+          <input type="hidden" id="incidentLng" name="longitude" />
+
+          <div class="mb-3">
+            <label for="category" class="form-label fw-semibold">Incident Category</label>
+            <select class="form-select" id="category" name="category" required>
+              <option value="" selected disabled>Select category...</option>
+              {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="incident_date" class="form-label fw-semibold">Incident Date</label>
+            <input type="date" class="form-control" id="incident_date" name="incident_date" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="location_text" class="form-label fw-semibold">Location / Area</label>
+            <input type="text" class="form-control" id="location_text" name="location_text" required minlength="3" maxlength="250" placeholder="Street, landmark, bus stop, or neighborhood" />
+            <div class="mt-2 d-flex align-items-center gap-2">
+              <button type="button" id="attachIncidentGpsBtn" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-geo-alt me-1"></i>Attach Current GPS (Optional)
+              </button>
+              <span id="incidentGpsStatus" class="small text-muted"></span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="form-label fw-semibold">Incident Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required minlength="10" maxlength="2000" placeholder="Describe what happened clearly (minimum 10 characters)..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-brand w-100 fw-semibold">
+            <i class="bi bi-send-fill me-1"></i>Submit Incident Report
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card card-safety">
+      <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-text text-primary me-2"></i>Your Submitted Reports ({{ reports|length }})</h5>
+      </div>
+      <div class="card-body">
+        {% if reports %}
+          <div class="vstack gap-3">
+            {% for r in reports %}
+              <div class="border rounded-3 p-3 bg-light-subtle">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                  <div>
+                    <span class="fw-bold">{{ r.category }}</span>
+                    <div class="small text-muted">Incident Date: {{ r.incident_date.strftime('%d %b %Y') }} • Submitted {{ r.created_at.strftime('%d %b %Y') }}</div>
+                  </div>
+                  <span class="badge {% if r.status == 'resolved' %}bg-success{% elif r.status == 'under_review' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+                    {{ r.status.replace('_', ' ')|title }}
+                  </span>
+                </div>
+                <p class="mb-2 small">{{ r.description }}</p>
+                <div class="small text-muted">
+                  <i class="bi bi-geo-alt me-1"></i>{{ r.location_text }}
+                  {% if r.latitude and r.longitude %}
+                    • <a href="https://www.openstreetmap.org/?mlat={{ r.latitude }}&mlon={{ r.longitude }}#map=16/{{ r.latitude }}/{{ r.longitude }}" target="_blank" rel="noopener">Map Coordinates</a>
+                  {% endif %}
+                </div>
+                {% if r.admin_note %}
+                  <div class="mt-2 p-2 bg-white border rounded small">
+                    <strong>Admin Note:</strong> {{ r.admin_note }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-journal-check display-4 d-block mb-2"></i>
+            <p class="mb-0">No incident reports submitted yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const gpsBtn = document.getElementById("attachIncidentGpsBtn");
+  const statusEl = document.getElementById("incidentGpsStatus");
+  const latInput = document.getElementById("incidentLat");
+  const lngInput = document.getElementById("incidentLng");
+
+  gpsBtn?.addEventListener("click", async () => {
+    gpsBtn.disabled = true;
+    statusEl.textContent = "Requesting permission...";
+    try {
+      const coords = await SafetyGeolocation.requestCurrentPosition();
+      latInput.value = coords.latitude;
+      lngInput.value = coords.longitude;
+      statusEl.textContent = `Attached (${coords.latitude}, ${coords.longitude})`;
+    } catch (err) {
+      statusEl.textContent = err.message;
+    } finally {
+      gpsBtn.disabled = false;
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Administrator Dashboard</h2>
+    <p class="text-muted mb-0">System overview, emergency alert monitoring, and incident report management. User contact details are masked for privacy.</p>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card card-safety p-3">
+      <div class="small text-muted">Registered Users</div>
+      <div class="fs-2 fw-bold">{{ stats.total_users }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-safety p-3 border-danger-subtle">
+      <div class="small text-muted">SOS Alerts (Active / Total)</div>
+      <div class="fs-2 fw-bold text-danger">{{ stats.active_alerts }} <span class="fs-6 text-muted">/ {{ stats.total_alerts }}</span></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-safety p-3">
+      <div class="small text-muted">Incident Reports (Open / Total)</div>
+      <div class="fs-2 fw-bold">{{ stats.pending_reports }} <span class="fs-6 text-muted">/ {{ stats.total_reports }}</span></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-safety p-3">
+      <div class="small text-muted">Notifications Logged</div>
+      <div class="fs-2 fw-bold">{{ stats.total_notifications }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Incident Reports Management -->
+<div class="card card-safety mb-4">
+  <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h5 class="fw-bold mb-0"><i class="bi bi-flag-fill text-warning me-2"></i>Incident Reports</h5>
+    <form method="GET" action="{{ url_for('admin.admin_dashboard') }}" class="d-flex gap-2">
+      <select name="report_status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All Statuses</option>
+        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+        <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+        <option value="resolved" {% if status_filter == 'resolved' %}selected{% endif %}>Resolved</option>
+      </select>
+    </form>
+  </div>
+  <div class="card-body">
+    {% if incident_reports %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Reporter (Masked)</th>
+              <th>Category &amp; Date</th>
+              <th>Location &amp; Description</th>
+              <th>Status</th>
+              <th>Update</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in incident_reports %}
+              <tr>
+                <td>#{{ r.id }}</td>
+                <td class="small">
+                  <div class="fw-semibold">{{ r.user.full_name }}</div>
+                  <div class="text-muted">{{ r.user.masked_email() }}</div>
+                </td>
+                <td class="small">
+                  <div class="fw-semibold">{{ r.category }}</div>
+                  <div class="text-muted">{{ r.incident_date.strftime('%d %b %Y') }}</div>
+                </td>
+                <td class="small" style="max-width: 280px;">
+                  <div class="fw-semibold">{{ r.location_text }}</div>
+                  <div class="text-muted">{{ r.description[:140] }}{% if r.description|length > 140 %}...{% endif %}</div>
+                </td>
+                <td>
+                  <span class="badge {% if r.status == 'resolved' %}bg-success{% elif r.status == 'under_review' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+                    {{ r.status.replace('_', ' ')|title }}
+                  </span>
+                </td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.update_incident', report_id=r.id) }}" class="d-flex flex-column gap-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <select name="status" class="form-select form-select-sm">
+                      <option value="submitted" {% if r.status == 'submitted' %}selected{% endif %}>Submitted</option>
+                      <option value="under_review" {% if r.status == 'under_review' %}selected{% endif %}>Under Review</option>
+                      <option value="resolved" {% if r.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+                    <input type="text" name="admin_note" class="form-control form-control-sm" placeholder="Admin note (optional)" value="{{ r.admin_note or '' }}" maxlength="300" />
+                    <button type="submit" class="btn btn-sm btn-dark">Save</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0 text-center py-4">No incident reports found.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Emergency Alerts Monitoring -->
+<div class="card card-safety">
+  <div class="card-header bg-white py-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-broadcast text-danger me-2"></i>Emergency SOS Alert Records</h5>
+  </div>
+  <div class="card-body">
+    {% if recent_alerts %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Alert ID</th>
+              <th>User (Masked Contact)</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in recent_alerts %}
+              <tr>
+                <td>#{{ a.id }}</td>
+                <td class="small">
+                  <div class="fw-semibold">{{ a.user.full_name }}</div>
+                  <div class="text-muted">{{ a.user.masked_phone() }}</div>
+                </td>
+                <td class="small">
+                  {% if a.map_link %}
+                    <a href="{{ a.map_link }}" target="_blank" rel="noopener">Open Map ({{ a.latitude }}, {{ a.longitude }})</a>
+                  {% else %}
+                    <span class="text-muted">{{ a.location_status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge {% if a.status == 'active' %}bg-danger{% elif a.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ a.status|capitalize }}
+                  </span>
+                </td>
+                <td class="small text-muted">{{ a.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                <td class="text-end">
+                  {% if a.status == 'active' %}
+                    <form method="POST" action="{{ url_for('admin.resolve_alert', alert_id=a.id) }}" class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button type="submit" class="btn btn-sm btn-outline-success">Mark Resolved</button>
+                    </form>
+                  {% else %}
+                    <span class="small text-muted">Closed</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0 text-center py-4">No SOS alerts recorded yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

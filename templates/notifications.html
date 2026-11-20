@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Notification Logs | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Emergency Notification Status</h2>
+    <p class="text-muted mb-0">Delivery status for every SOS alert sent to your trusted contacts.</p>
+  </div>
+  <span class="badge {% if simulation_mode %}bg-warning text-dark{% else %}bg-success{% endif %} px-3 py-2">
+    {% if simulation_mode %}Mode: Simulation (Development){% else %}Mode: Live Provider{% endif %}
+  </span>
+</div>
+
+<div class="card card-safety">
+  <div class="card-body">
+    {% if logs %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Alert</th>
+              <th>Contact</th>
+              <th>Recipient</th>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Provider Note</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for n in logs %}
+              <tr>
+                <td>#{{ n.alert_id }}</td>
+                <td class="fw-semibold">{{ n.contact_name }}</td>
+                <td>{{ n.recipient }}</td>
+                <td><span class="badge bg-light text-dark border">{{ n.channel|upper }}</span></td>
+                <td>
+                  {% if n.status == 'sent' %}
+                    <span class="badge bg-success">Confirmed Sent</span>
+                  {% elif n.status == 'simulated' %}
+                    <span class="badge bg-warning text-dark">Simulated</span>
+                  {% elif n.status == 'failed' %}
+                    <span class="badge bg-danger">Failed</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ n.status }}</span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">{{ n.provider_message or '—' }}</td>
+                <td class="small text-muted">{{ n.sent_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-bell-slash display-4 d-block mb-2"></i>
+        <p class="mb-0">No notifications have been dispatched yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

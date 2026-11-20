@@ -1,0 +1,6 @@
+{
+  "name": "Women's Safety and Emergency Assistance System",
+  "description": "A Flask and SQLite web platform for women's emergency SOS alerts, trusted contact management, permission-based live location sharing, nearby emergency services mapping, and incident reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

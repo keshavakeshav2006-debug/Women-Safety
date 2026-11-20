@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Home | Women's Safety & Emergency Assistance System{% endblock %}
+
+{% block content %}
+<section class="hero-banner mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <span class="badge bg-warning text-dark mb-3 px-3 py-2">24/7 Emergency Support Platform</span>
+      <h1 class="display-5 fw-bold mb-3">Women's Safety &amp; Emergency Assistance System</h1>
+      <p class="lead opacity-90 mb-4">
+        Trigger confirmed SOS emergency alerts, share permission-based live GPS locations with trusted contacts, locate nearby police stations and hospitals on OpenStreetMap, and report safety incidents securely.
+      </p>
+      <div class="d-flex flex-wrap gap-3">
+        {% if current_user %}
+          <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-light btn-lg fw-semibold">
+            <i class="bi bi-speedometer2 me-2"></i>Open Dashboard
+          </a>
+          <a href="{{ url_for('sos.sos_page') }}" class="btn btn-danger btn-lg fw-bold">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>Go to SOS Alert
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg fw-bold">
+            <i class="bi bi-person-plus-fill me-2"></i>Create Free Account
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>User Login
+          </a>
+        {% endif %}
+        <a href="tel:112" class="btn btn-danger btn-lg fw-bold">
+          <i class="bi bi-telephone-fill me-2"></i>Emergency Call 112
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-4 text-center">
+      <div class="bg-white bg-opacity-10 rounded-4 p-4 border border-white border-opacity-25">
+        <i class="bi bi-shield-lock-fill display-1 text-warning mb-3 d-block"></i>
+        <h5 class="fw-bold">Privacy-First Location</h5>
+        <p class="small mb-0 opacity-90">
+          Your browser coordinates are never collected without your explicit permission and can be stopped anytime.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card card-safety card-safety-hover h-100 p-3">
+      <div class="card-body">
+        <div class="stat-icon bg-danger-subtle text-danger mb-3"><i class="bi bi-broadcast"></i></div>
+        <h5 class="fw-bold">Confirmed SOS Alerts</h5>
+        <p class="text-muted mb-0">Two-step SOS confirmation prevents accidental triggers while dispatching alerts and OpenStreetMap links to your trusted contacts.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-safety card-safety-hover h-100 p-3">
+      <div class="card-body">
+        <div class="stat-icon bg-primary-subtle text-primary mb-3"><i class="bi bi-geo-alt-fill"></i></div>
+        <h5 class="fw-bold">Interactive Maps &amp; Nearby Help</h5>
+        <p class="text-muted mb-0">Share your live GPS coordinates on Leaflet + OpenStreetMap and locate nearby police stations and 24/7 hospitals.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-safety card-safety-hover h-100 p-3">
+      <div class="card-body">
+        <div class="stat-icon bg-success-subtle text-success mb-3"><i class="bi bi-journal-text"></i></div>
+        <h5 class="fw-bold">Incident Reporting &amp; Helplines</h5>
+        <p class="text-muted mb-0">Log safety incidents with location and date details for review, and access verified India emergency helpline numbers anytime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Nearby Emergency Services | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Nearby Emergency Services</h2>
+    <p class="text-muted mb-0">Find police stations and 24/7 emergency hospitals on OpenStreetMap.</p>
+  </div>
+  <button type="button" id="useMyLocationServicesBtn" class="btn btn-brand fw-semibold">
+    <i class="bi bi-crosshair me-2"></i>Sort by My Current Location
+  </button>
+</div>
+
+<div class="card card-safety mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="serviceTypeFilter" class="form-label fw-semibold">Service Type</label>
+        <select id="serviceTypeFilter" class="form-select">
+          <option value="">All Services (Police &amp; Hospitals)</option>
+          <option value="police">Police Stations Only</option>
+          <option value="hospital">Hospitals Only</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="serviceCityFilter" class="form-label fw-semibold">City</label>
+        <select id="serviceCityFilter" class="form-select">
+          <option value="">All Cities</option>
+          {% for c in cities %}
+            <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <div id="servicesLocationStatus" class="small text-muted">
+          Showing directory locations. Click "Sort by My Current Location" to calculate distances.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-safety mb-4">
+  <div class="card-body">
+    <div id="servicesMap" class="map-container"></div>
+  </div>
+</div>
+
+<div id="servicesListContainer" class="row g-3"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

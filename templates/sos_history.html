@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}SOS History | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">SOS Alert History</h2>
+    <p class="text-muted mb-0">Review previous emergency alerts, shared locations, and notification delivery statuses.</p>
+  </div>
+  <a href="{{ url_for('sos.sos_page') }}" class="btn btn-danger fw-semibold">
+    <i class="bi bi-broadcast me-1"></i>SOS Page
+  </a>
+</div>
+
+{% if alerts %}
+  <div class="vstack gap-3">
+    {% for alert in alerts %}
+      <div class="card card-safety">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <span class="fw-bold me-2">Alert #{{ alert.id }}</span>
+            <span class="badge {% if alert.status == 'active' %}bg-danger{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ alert.status|capitalize }}
+            </span>
+          </div>
+          <div class="small text-muted">
+            <i class="bi bi-clock me-1"></i>{{ alert.created_at.strftime('%d %b %Y, %I:%M:%S %p UTC') }}
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="mb-2"><strong>Message:</strong> {{ alert.message }}</p>
+          <p class="mb-3">
+            <strong>Location:</strong>
+            {% if alert.map_link %}
+              Lat {{ alert.latitude }}, Lng {{ alert.longitude }}
+              <a href="{{ alert.map_link }}" target="_blank" rel="noopener" class="ms-2 btn btn-sm btn-outline-primary">
+                <i class="bi bi-map me-1"></i>Open on OpenStreetMap
+              </a>
+            {% else %}
+              <span class="text-muted">Not shared ({{ alert.location_status }})</span>
+            {% endif %}
+          </p>
+
+          <h6 class="fw-bold small text-uppercase text-muted mb-2">Notifications ({{ alert.notifications|length }})</h6>
+          {% if alert.notifications %}
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-bordered mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Contact</th>
+                    <th>Recipient</th>
+                    <th>Channel</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for n in alert.notifications %}
+                    <tr>
+                      <td>{{ n.contact_name }}</td>
+                      <td>{{ n.recipient }}</td>
+                      <td>{{ n.channel|upper }}</td>
+                      <td>
+                        {% if n.status == 'sent' %}
+                          <span class="badge bg-success">Confirmed Sent</span>
+                        {% elif n.status == 'simulated' %}
+                          <span class="badge bg-warning text-dark">Simulated (Dev Mode)</span>
+                        {% elif n.status == 'failed' %}
+                          <span class="badge bg-danger">Failed</span>
+                        {% else %}
+                          <span class="badge bg-secondary">{{ n.status }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="small text-muted">{{ n.provider_message or '—' }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="small text-muted mb-3">No contact notifications were linked to this alert.</p>
+          {% endif %}
+
+          {% if alert.status == 'active' %}
+            <div class="d-flex gap-2">
+              <form method="POST" action="{{ url_for('sos.update_alert_status', alert_id=alert.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="status" value="resolved" />
+                <button type="submit" class="btn btn-sm btn-success">Mark Resolved</button>
+              </form>
+              <form method="POST" action="{{ url_for('sos.update_alert_status', alert_id=alert.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="status" value="cancelled" />
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Cancel Alert</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card card-safety p-5 text-center text-muted">
+    <i class="bi bi-clock-history display-4 d-block mb-2"></i>
+    <p class="mb-0">You have not created any SOS alerts yet.</p>
+  </div>
+{% endif %}
+{% endblock %}

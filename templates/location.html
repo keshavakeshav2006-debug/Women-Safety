@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Live Location Sharing | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card card-safety h-100">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Location Sharing</h5>
+        <span id="sharingStatusBadge" class="badge bg-secondary">Inactive</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small">
+          Location access is strictly permission-based. Coordinates are only requested when you click <strong>Start Location Sharing</strong>, and you can stop at any moment.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <button type="button" id="startSharingBtn" class="btn btn-brand fw-semibold">
+            <i class="bi bi-broadcast me-1"></i>Start Location Sharing
+          </button>
+          <button type="button" id="stopSharingBtn" class="btn btn-outline-danger fw-semibold" disabled>
+            <i class="bi bi-stop-circle me-1"></i>Stop Sharing
+          </button>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-4">
+            <div class="p-2 bg-light rounded border text-center">
+              <div class="small text-muted">Latitude</div>
+              <div id="shareLat" class="fw-bold">—</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 bg-light rounded border text-center">
+              <div class="small text-muted">Longitude</div>
+              <div id="shareLng" class="fw-bold">—</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 bg-light rounded border text-center">
+              <div class="small text-muted">Accuracy</div>
+              <div id="shareAccuracy" class="fw-bold">—</div>
+            </div>
+          </div>
+        </div>
+
+        <label for="shareMapLink" class="form-label fw-semibold small">Shareable OpenStreetMap Link</label>
+        <div class="input-group mb-3">
+          <input type="text" id="shareMapLink" class="form-control form-control-sm" readonly placeholder="Start sharing to generate map link..." />
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-copy-target="#shareMapLink">
+            <i class="bi bi-clipboard"></i> Copy
+          </button>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <a id="openOsmLink" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary disabled">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Open Map
+          </a>
+          <a id="whatsappShareLink" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-success disabled">
+            <i class="bi bi-share me-1"></i>Share via WhatsApp
+          </a>
+        </div>
+
+        <div id="locationFeedback" class="d-none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card card-safety">
+      <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-map me-2 text-success"></i>Interactive OpenStreetMap View</h5>
+      </div>
+      <div class="card-body">
+        <div id="locationShareMap" class="map-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

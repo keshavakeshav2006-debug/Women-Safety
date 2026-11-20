@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Safety Information & Helplines | Women's Safety System{% endblock %}
+
+{% block content %}
+<div class="card card-safety border-danger mb-4">
+  <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+      <span class="badge bg-danger mb-2">India National Emergency Helpline</span>
+      <h2 class="fw-bold mb-1">Need Immediate Police, Medical, or Fire Help?</h2>
+      <p class="text-muted mb-0">Dial <strong>112</strong> anywhere in India for 24/7 unified emergency response.</p>
+    </div>
+    <a href="tel:112" class="btn btn-danger btn-lg fw-bold px-4">
+      <i class="bi bi-telephone-fill me-2"></i>Call 112 Now
+    </a>
+  </div>
+</div>
+
+<h4 class="fw-bold mb-3">Important Helpline Numbers (India)</h4>
+<div class="row g-3 mb-5">
+  {% for h in helplines %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card card-safety h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <div class="helpline-number mb-1">{{ h.number }}</div>
+            <h6 class="fw-bold">{{ h.name }}</h6>
+            <p class="small text-muted">{{ h.desc }}</p>
+          </div>
+          <a href="tel:{{ h.number }}" class="btn btn-outline-danger btn-sm fw-semibold align-self-start">
+            <i class="bi bi-telephone me-1"></i>Call {{ h.number }}
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<h4 class="fw-bold mb-3">Personal Safety Guidelines</h4>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card card-safety h-100">
+      <div class="card-body">
+        <h6 class="fw-bold text-primary"><i class="bi bi-car-front-fill me-2"></i>Travel &amp; Commute Safety</h6>
+        <ul class="small text-muted mb-0 ps-3">
+          <li class="mb-1">Share your live location link with a trusted contact before boarding late-night cabs or public transport.</li>
+          <li class="mb-1">Verify vehicle registration plates and driver details before entering a ride-share.</li>
+          <li>Prefer well-lit main roads and stay alert rather than wearing noise-canceling headphones in isolated areas.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card card-safety h-100">
+      <div class="card-body">
+        <h6 class="fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Digital &amp; Emergency Preparedness</h6>
+        <ul class="small text-muted mb-0 ps-3">
+          <li class="mb-1">Keep at least 2–3 trusted emergency contacts updated in your profile and speed dial.</li>
+          <li class="mb-1">Use SOS confirmation or dial <strong>112</strong> directly if you feel threatened; move toward crowded areas or open shops.</li>
+          <li>Preserve screenshots, call logs, or dates when reporting harassment or cyberstalking incidents.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
